@@ -1,0 +1,78 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Server Tests & Lint
+  server-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: server/package-lock.json
+
+    - name: Install server dependencies
+      working-directory: ./server
+      run: npm ci
+
+    - name: Run TypeScript type check
+      working-directory: ./server
+      run: npm run lint
+
+    - name: Run server tests
+      working-directory: ./server
+      run: npm test
+      env:
+        NODE_ENV: test
+        OLLAMA_BASE_URL: http://localhost:11434
+
+  # Client Build Check
+  client-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: client/package-lock.json
+
+    - name: Install client dependencies
+      working-directory: ./client
+      run: npm ci
+
+    - name: Build client
+      working-directory: ./client
+      run: npm run build
+
+    - name: Run TypeScript type check
+      working-directory: ./client
+      run: npm run lint
+
+  # Deploy to Render (Production)
+  deploy:
+    needs: [server-checks, client-build]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Deploy to Render
+      run: |
+        echo "Deploying to Render..."
+        # Add Render deploy hook here
+        # curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
