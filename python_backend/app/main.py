@@ -2,6 +2,8 @@
 
 import os
 import uuid
+import json
+import dataclasses
 from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
@@ -9,11 +11,9 @@ from typing import AsyncGenerator
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-import json
 
 from app.config import HOST, PORT, ENVIRONMENT, UPLOAD_DIR, MAX_FILE_SIZE
 from app.logger import logger
-from app.models import ChatRequest, FAQImportRequest
 from app.vector_store import vector_store
 from app.ollama_service import ollama_service
 from app.document_service import document_service
@@ -163,12 +163,13 @@ async def delete_document(doc_id: str):
 
 
 @app.post("/api/faqs")
-async def import_faqs(request: FAQImportRequest):
+async def import_faqs(request: dict):
     """Import FAQ items into the knowledge base."""
-    if not request.faqs:
+    faqs = request.get("faqs", [])
+    if not faqs:
         raise HTTPException(status_code=400, detail="No FAQ items provided")
 
-    result = await document_service.import_faqs([faq.model_dump() for faq in request.faqs])
+    result = await document_service.import_faqs(faqs)
     if result.success and result.document:
         return {
             "success": True,
@@ -202,15 +203,17 @@ Context from knowledge base:"""
 
 
 @app.post("/api/chat")
-async def chat_message(request: ChatRequest):
+async def chat_message(request: dict):
     """Send a message to the AI assistant and get a response."""
-    if not request.message or not request.message.strip():
+    message = request.get("message", "")
+    session_id = request.get("session_id")
+    if not message or not message.strip():
         raise HTTPException(status_code=400, detail="Message is required and must be a string")
 
-    logger.info(f"Chat message received: \"{request.message[:50]}...\"")
+    logger.info(f"Chat message received: \"{message[:50]}...\"")
 
     try:
-        response = await chat_service.process_message(request)
+        response = await chat_service.process_message(message, session_id)
         return {
             "success": True,
             "message": {
@@ -219,14 +222,14 @@ async def chat_message(request: ChatRequest):
                 "content": response.message.content,
                 "timestamp": response.message.timestamp.isoformat(),
                 "sources": (
-                    [s.model_dump() for s in response.message.sources]
+                    [dataclasses.asdict(s) for s in response.message.sources]
                     if response.message.sources
                     else None
                 ),
             },
             "sessionId": response.session_id,
             "sources": (
-                [s.model_dump() for s in response.sources]
+                [dataclasses.asdict(s) for s in response.sources]
                 if response.sources
                 else None
             ),
@@ -237,15 +240,17 @@ async def chat_message(request: ChatRequest):
 
 
 @app.post("/api/chat/stream")
-async def chat_stream(request: ChatRequest):
+async def chat_stream(request: dict):
     """Stream AI response tokens using Server-Sent Events."""
-    if not request.message or not request.message.strip():
+    message = request.get("message", "")
+    session_id = request.get("session_id")
+    if not message or not message.strip():
         raise HTTPException(status_code=400, detail="Valid message is required")
 
-    logger.info(f"Streaming chat: \"{request.message[:50]}...\"")
+    logger.info(f"Streaming chat: \"{message[:50]}...\"")
 
     async def event_generator():
-        async for event in chat_service.stream_message(request):
+        async for event in chat_service.stream_message(message, session_id):
             yield f"data: {json.dumps(event)}\n\n"
         yield "data: [DONE]\n\n"
 
@@ -297,7 +302,7 @@ async def get_session(session_id: str):
                     "content": m.content,
                     "timestamp": m.timestamp.isoformat(),
                     "sources": (
-                        [s.model_dump() for s in m.sources]
+                        [dataclasses.asdict(s) for s in m.sources]
                         if m.sources
                         else None
                     ),

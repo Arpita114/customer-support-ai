@@ -1,7 +1,8 @@
 import uuid
+import dataclasses
 from datetime import datetime
 from app.config import MAX_CONTEXT_MESSAGES
-from app.models import ChatSession, ChatMessage, ChatRequest, ChatResponse, Source
+from app.models import ChatSession, ChatMessage, ChatResponse, Source
 from app.ollama_service import ollama_service
 from app.vector_store import vector_store
 from app.document_service import document_service
@@ -27,9 +28,8 @@ class ChatService:
     def __init__(self):
         self.sessions: dict[str, ChatSession] = {}
 
-    async def process_message(self, request: ChatRequest) -> ChatResponse:
-        message = request.message
-        session_id = request.session_id or str(uuid.uuid4())
+    async def process_message(self, message: str, session_id: str | None = None) -> ChatResponse:
+        session_id = session_id or str(uuid.uuid4())
 
         session = self.sessions.get(session_id)
         if not session:
@@ -99,9 +99,8 @@ class ChatService:
             sources=sources if sources else None,
         )
 
-    async def stream_message(self, request: ChatRequest):
-        message = request.message
-        session_id = request.session_id or str(uuid.uuid4())
+    async def stream_message(self, message: str, session_id: str | None = None):
+        session_id = session_id or str(uuid.uuid4())
 
         session = self.sessions.get(session_id)
         if not session:
@@ -123,7 +122,7 @@ class ChatService:
                 sources.append(result)
 
         if sources:
-            yield {"type": "sources", "data": {"sources": [s.model_dump() for s in sources]}}
+            yield {"type": "sources", "data": {"sources": [dataclasses.asdict(s) for s in sources]}}
 
         if not sources:
             logger.info("No relevant sources found - returning escalation message")
