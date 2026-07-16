@@ -236,10 +236,18 @@ HOST=0.0.0.0
 PORT=8000
 ENVIRONMENT=development
 
-# Ollama AI Configuration
+# Ollama AI Configuration (local development)
 OLLAMA_BASE_URL=http://localhost:11434
 LLM_MODEL=llama3.2
 EMBEDDING_MODEL=nomic-embed-text
+
+# OpenAI-compatible API (production / Render)
+# Get a free API key from https://console.groq.com/keys
+USE_OPENAI_FALLBACK=false
+OPENAI_API_KEY=
+OPENAI_BASE_URL=https://api.groq.com/openai/v1
+OPENAI_CHAT_MODEL=llama3-8b-8192
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 
 # Vector Database
 VECTOR_DB_PATH=./data/vectors
@@ -256,36 +264,24 @@ LOG_LEVEL=INFO
 
 ## Deployment
 
-### Production
+### Backend on Render
 
-```bash
-# Install production dependencies
-pip install -r python_backend/requirements.txt
-
-# Build frontend
-cd client
-npm run build
-
-# Start backend with production settings
-cd python_backend
-ENVIRONMENT=production python run_server.py
-```
-
-### Docker (Optional)
-
-```dockerfile
-# Example Dockerfile for backend
-FROM python:3.14-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["python", "run_server.py"]
-```
-
----
-
-## Deployment
+1. Push this repository to GitHub.
+2. Create a new **Web Service** in [Render](https://render.com/).
+3. Connect your GitHub repo.
+4. Set the following:
+   - **Root Directory**: `python_backend`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Environment**: `Python 3.14`
+5. Add environment variables:
+   - `ENVIRONMENT=production`
+   - `USE_OPENAI_FALLBACK=true`
+   - `OPENAI_API_KEY` = your Groq API key (get one free at https://console.groq.com/keys)
+   - `OPENAI_BASE_URL=https://api.groq.com/openai/v1`
+   - `OPENAI_CHAT_MODEL=llama3-8b-8192`
+   - `OPENAI_EMBEDDING_MODEL=text-embedding-3-small`
+6. Deploy. Render will give you a public backend URL.
 
 ### Frontend on Vercel
 
@@ -294,6 +290,17 @@ CMD ["python", "run_server.py"]
 3. Set the **Root Directory** to `client`.
 4. Add an environment variable:
    - `VITE_API_URL` = your Render backend URL (for example, `https://customer-support-ai-backend.onrender.com`)
+5. Deploy.
+
+### Connect Frontend to Backend
+
+After both are deployed:
+- Set `VITE_API_URL` in Vercel to your Render backend URL.
+- Redeploy the frontend on Vercel.
+
+---
+
+## Contributing
 5. Deploy. Vercel will detect Vite and build automatically.
 
 ### Backend on Render

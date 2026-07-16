@@ -9,10 +9,14 @@ services:
         value: 3.14.0
       - key: ENVIRONMENT
         value: production
-      - key: OLLAMA_BASE_URL
-        value: https://api.ollama.ai
-      - key: LLM_MODEL
-        value: llama3.2
-      - key: EMBEDDING_MODEL
-        value: nomic-embed-text
+      - key: USE_OPENAI_FALLBACK
+        value: "true"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: OPENAI_CHAT_MODEL
+        value: llama3-8b-8192
+      - key: OPENAI_EMBEDDING_MODEL
+        value: text-embedding-3-small
     plan: free
