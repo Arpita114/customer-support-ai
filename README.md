@@ -165,7 +165,18 @@ git clone https://github.com/Arpita114/customer-support-ai.git
 cd customer-support-ai
 ```
 
-### 2. Install Ollama Models
+### 2. Start Ollama
+
+```bash
+# Start Ollama service
+ollama serve
+```
+
+**Note:** Keep this terminal window open while running the project. Ollama must be running for the AI to work.
+
+### 3. Install Ollama Models
+
+Open a new terminal and run:
 
 ```bash
 # Pull required AI models
@@ -176,21 +187,27 @@ ollama pull nomic-embed-text
 ollama list
 ```
 
-### 3. Install Python Dependencies
+**Or use the setup script:**
+
+```bash
+npm run setup:ollama
+```
+
+### 4. Install Python Dependencies
 
 ```bash
 cd python_backend
 pip install -r requirements.txt
 ```
 
-### 4. Install Frontend Dependencies
+### 5. Install Frontend Dependencies
 
 ```bash
 cd client
 npm install
 ```
 
-### 5. Start Development
+### 6. Start Development
 
 ```bash
 # Terminal 1: Start the Python backend
@@ -202,7 +219,7 @@ cd client
 npm run dev
 ```
 
-### 6. Open in Browser
+### 7. Open in Browser
 
 - **Application:** http://localhost:5173
 - **API Documentation:** http://localhost:8000/docs

@@ -1,0 +1,12 @@
+{
+  "name": "customer-support-ai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup:ollama": "node scripts/setup-ollama.js",
+    "dev:backend": "cd python_backend && python run_server.py",
+    "dev:frontend": "cd client && npm run dev",
+    "dev": "npm run dev:backend & npm run dev:frontend"
+  }
+}
