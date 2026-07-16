@@ -7,6 +7,11 @@ from app.ollama_service import ollama_service
 from app.models import TextChunk, Source
 from app.logger import logger
 
+try:
+    chromadb.get_settings().anonymized_telemetry = False
+except Exception:
+    pass
+
 
 class VectorStore:
     def __init__(self):

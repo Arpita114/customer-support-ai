@@ -14,7 +14,7 @@ class OllamaService:
 
     async def check_health(self) -> bool:
         try:
-            response = await self.client.get(f"{self.base_url}/api/tags")
+            response = await self.client.get(f"{self.base_url}/api/tags", timeout=5.0)
             return response.status_code == 200
         except Exception:
             return False
