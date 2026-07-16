@@ -285,6 +285,42 @@ CMD ["python", "run_server.py"]
 
 ---
 
+## Deployment
+
+### Frontend on Vercel
+
+1. Push this repository to GitHub.
+2. Import the repository in [Vercel](https://vercel.com/).
+3. Set the **Root Directory** to `client`.
+4. Add an environment variable:
+   - `VITE_API_URL` = your Render backend URL (for example, `https://customer-support-ai-backend.onrender.com`)
+5. Deploy. Vercel will detect Vite and build automatically.
+
+### Backend on Render
+
+1. Push this repository to GitHub.
+2. Create a new **Web Service** in [Render](https://render.com/).
+3. Connect your GitHub repo.
+4. Set the following:
+   - **Root Directory**: `python_backend`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Environment**: `Python 3.14`
+5. Add environment variables:
+   - `ENVIRONMENT=production`
+   - `OLLAMA_BASE_URL=https://api.ollama.ai`
+   - `LLM_MODEL=llama3.2`
+   - `EMBEDDING_MODEL=nomic-embed-text`
+6. Deploy. Render will give you a public backend URL.
+
+### Connect Frontend to Backend
+
+After both are deployed:
+- Set `VITE_API_URL` in Vercel to your Render backend URL.
+- Redeploy the frontend on Vercel.
+
+---
+
 ## Contributing
 
 1. Fork the repository

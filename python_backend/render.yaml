@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: customer-support-ai-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.14.0
+      - key: ENVIRONMENT
+        value: production
+      - key: OLLAMA_BASE_URL
+        value: https://api.ollama.ai
+      - key: LLM_MODEL
+        value: llama3.2
+      - key: EMBEDDING_MODEL
+        value: nomic-embed-text
+    plan: free
