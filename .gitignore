@@ -38,3 +38,30 @@ Thumbs.db
 
 # Testing
 coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Test files
+test_*.py
+e2e_*.py
+*_test.py
+test_doc.*
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~

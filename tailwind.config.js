@@ -20,10 +20,6 @@ export default {
           900: '#1e3a8a',
         }
       },
-      animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'bounce-slow': 'bounce 2s infinite',
-      }
     },
   },
   plugins: [],
